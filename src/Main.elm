@@ -12,8 +12,8 @@ import Html.Events exposing (..)
 -- TODO
 --   functionality
 --     [X] rouble cost text inputs
+--     [X] per hour / per day toggle
 --     [ ] payback time
---     [ ] per hour / per day toggle
 --     [ ] fetch live prices + autopopulate
 --   other
 --     [ ] comma separate roubles, e.g. "12,345"
@@ -148,7 +148,13 @@ type alias Model =
     , roublesBitcoin : Int
     , roublesMetalFuel : Int
     , roublesExpeditionaryFuel : Int
+    , displayPer : TimeUnit
     }
+
+
+type TimeUnit
+    = Hour
+    | Day
 
 
 init : Flags -> ( Model, Cmd Msg )
@@ -164,6 +170,7 @@ initModel flags =
     , roublesBitcoin = 542000
     , roublesMetalFuel = 170000
     , roublesExpeditionaryFuel = 120000
+    , displayPer = Hour
     }
 
 
@@ -182,6 +189,7 @@ type Msg
     | SetFuel Fuel
     | SetSolar Bool
     | AdjustPrice Item Int
+    | DisplayPer TimeUnit
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -198,6 +206,9 @@ update msg model =
 
         AdjustPrice item int ->
             pure <| adjustPrice model item int
+
+        DisplayPer unit ->
+            pure { model | displayPer = unit }
 
 
 adjustPrice : Model -> Item -> Int -> Model
@@ -225,7 +236,16 @@ adjustPrice model item int =
 
 
 view : Model -> Html Msg
-view ({ solar, fuel } as model) =
+view ({ solar, fuel, displayPer } as model) =
+    let
+        per =
+            case displayPer of
+                Hour ->
+                    "hour"
+
+                Day ->
+                    "day"
+    in
     div []
         [ div [] <| List.map (viewItemPriceInput model) items
         , hr [] []
@@ -269,12 +289,37 @@ view ({ solar, fuel } as model) =
             , span [] [ text <| (String.fromInt <| fuelRoublesPerHour model) ++ "₽" ]
             ]
         , hr [] []
+        , div []
+            [ div
+                []
+                [ input
+                    [ type_ "radio"
+                    , checked <| displayPer == Hour
+                    , onClick <| DisplayPer Hour
+                    ]
+                    []
+                , label [] [ text "Hour" ]
+                , br [] []
+                ]
+            , div
+                []
+                [ input
+                    [ type_ "radio"
+                    , checked <| displayPer == Day
+                    , onClick <| DisplayPer Day
+                    ]
+                    []
+                , label [] [ text "Day" ]
+                , br [] []
+                ]
+            ]
         , table [ style "border-collapse" "collapse" ]
             [ thead []
                 [ tr [ cellBorder ]
                     [ th [ cellBorder ] [ text "GPUs" ]
                     , th [ cellBorder ] [ text "time per 0.2 BTC" ]
-                    , th [ cellBorder ] [ text "roubles per hour (less fuel)" ]
+                    , th [ cellBorder ] [ text <| "roubles per " ++ per ++ " (less fuel)" ]
+                    , th [ cellBorder ] [ text "pay-back-time in days" ]
                     ]
                 ]
             , tbody [] <| List.map (row model) (List.range 1 50)
@@ -324,7 +369,7 @@ viewItemPriceInput model item =
 
 
 row : Model -> Int -> Html Msg
-row ({ solar, fuel } as model) count =
+row ({ solar, fuel, displayPer } as model) count =
     let
         rph =
             roublesPerHour model count
@@ -332,8 +377,16 @@ row ({ solar, fuel } as model) count =
         fph =
             fuelRoublesPerHour model
 
-        rphlf =
-            rph - fph
+        roubles =
+            case displayPer of
+                Hour ->
+                    rph
+
+                Day ->
+                    rph * 24
+
+        roublesLessFuel =
+            roubles - fph
 
         ( hour, min ) =
             count
@@ -341,15 +394,14 @@ row ({ solar, fuel } as model) count =
                 |> hourMin
                 |> Tuple.mapBoth String.fromInt String.fromInt
 
-        -- payback =
-        --     paybackDaysForGpus model count
+        payback =
+            paybackDaysForGpus model count
     in
     tr []
         [ td [ cellBorder ] [ text <| String.fromInt count ]
         , td [ cellBorder ] [ text <| hour ++ "h" ++ min ++ "m" ]
-        , td [ cellBorder ] [ text <| String.fromInt rph ++ "₽  (" ++ String.fromInt rphlf ++ "₽" ++ ")" ]
-
-        -- , td [] [ text <| String.fromFloat payback ]
+        , td [ cellBorder ] [ text <| String.fromInt roubles ++ "₽  (" ++ String.fromInt roubles ++ "₽" ++ ")" ]
+        , td [ cellBorder ] [ text <| String.fromFloat payback ]
         ]
 
 
