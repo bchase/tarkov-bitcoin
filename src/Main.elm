@@ -11,38 +11,14 @@ import Html.Events exposing (..)
 --
 -- TODO
 --   functionality
+--     [X] rouble cost text inputs
 --     [ ] payback time
 --     [ ] per hour / per day toggle
---     [ ] rouble cost text inputs
 --     [ ] fetch live prices + autopopulate
 --   other
 --     [ ] comma separate roubles, e.g. "12,345"
 --     [ ] display explanations from wiki
 --     [ ] README
-
-
-bitcoinRoubles : Int
-bitcoinRoubles =
-    542000
-
-
-gpuRoubles : Int
-gpuRoubles =
-    570000
-
-
-expeditionaryFuelRoubles : Int
-expeditionaryFuelRoubles =
-    120000
-
-
-metalFuelRoubles : Int
-metalFuelRoubles =
-    170000
-
-
-
---
 
 
 fuelUnitPowerTime : Bool -> Float
@@ -60,14 +36,14 @@ fuelUnitPowerTime solar =
     (14 / 60 + 27 / 3600) * m
 
 
-fuelRoublesPerHour : Bool -> Fuel -> Int
-fuelRoublesPerHour solar fuel =
+fuelRoublesPerHour : Model -> Int
+fuelRoublesPerHour ({ solar, fuel } as model) =
     let
         tpu =
             fuelUnitPowerTime solar
 
         totalFuelCost =
-            fuelItemCost fuel
+            fuelItemCost model fuel
 
         units =
             fuelUnits fuel
@@ -78,9 +54,9 @@ fuelRoublesPerHour solar fuel =
     ceiling <| toFloat totalFuelCost / totalFuelTime
 
 
-roublesPerHour : Int -> Int
-roublesPerHour count =
-    round <| bitcoinPerHour count * toFloat bitcoinRoubles
+roublesPerHour : Model -> Int -> Int
+roublesPerHour { roublesBitcoin } count =
+    round <| bitcoinPerHour count * toFloat roublesBitcoin
 
 
 bitcoinPerHour : Int -> Float
@@ -93,19 +69,14 @@ timePerBitcoin count =
     1 / bitcoinPerHour count
 
 
-gpuCost : Int -> Int
-gpuCost count =
-    gpuRoubles * count
-
-
-paybackDaysForGpus : Int -> Float
-paybackDaysForGpus count =
+paybackDaysForGpus : Model -> Int -> Float
+paybackDaysForGpus { roublesGpu, roublesBitcoin } count =
     let
         cost =
-            toFloat <| gpuCost count
+            toFloat <| roublesGpu * count
 
         roublesPerDay =
-            toFloat bitcoinRoubles * bitcoinPerHour count * 24
+            toFloat roublesBitcoin * bitcoinPerHour count * 24
     in
     cost / roublesPerDay
 
@@ -125,14 +96,45 @@ fuelUnits fuel =
             60
 
 
-fuelItemCost : Fuel -> Int
-fuelItemCost fuel =
+fuelItemCost : Model -> Fuel -> Int
+fuelItemCost { roublesMetalFuel, roublesExpeditionaryFuel } fuel =
     case fuel of
         Metal ->
-            metalFuelRoubles
+            roublesMetalFuel
 
         Expeditionary ->
-            expeditionaryFuelRoubles
+            roublesExpeditionaryFuel
+
+
+type Item
+    = Gpu
+    | Bitcoin
+    | MFuel
+    | EFuel
+
+
+items : List Item
+items =
+    let
+        ensure totality =
+            case totality of
+                Gpu ->
+                    ()
+
+                Bitcoin ->
+                    ()
+
+                MFuel ->
+                    ()
+
+                EFuel ->
+                    ()
+    in
+    [ Gpu
+    , Bitcoin
+    , MFuel
+    , EFuel
+    ]
 
 
 
@@ -142,6 +144,10 @@ fuelItemCost fuel =
 type alias Model =
     { solar : Bool
     , fuel : Fuel
+    , roublesGpu : Int
+    , roublesBitcoin : Int
+    , roublesMetalFuel : Int
+    , roublesExpeditionaryFuel : Int
     }
 
 
@@ -154,6 +160,10 @@ initModel : Flags -> Model
 initModel flags =
     { solar = False
     , fuel = Metal
+    , roublesGpu = 570000
+    , roublesBitcoin = 542000
+    , roublesMetalFuel = 170000
+    , roublesExpeditionaryFuel = 120000
     }
 
 
@@ -171,6 +181,7 @@ type Msg
     = NoOp
     | SetFuel Fuel
     | SetSolar Bool
+    | AdjustPrice Item Int
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -185,6 +196,29 @@ update msg model =
         SetFuel fuel ->
             pure { model | fuel = fuel }
 
+        AdjustPrice item int ->
+            pure <| adjustPrice model item int
+
+
+adjustPrice : Model -> Item -> Int -> Model
+adjustPrice model item int =
+    let
+        { roublesGpu, roublesBitcoin, roublesMetalFuel, roublesExpeditionaryFuel } =
+            model
+    in
+    case item of
+        Gpu ->
+            { model | roublesGpu = roublesGpu + int }
+
+        Bitcoin ->
+            { model | roublesBitcoin = roublesBitcoin + int }
+
+        MFuel ->
+            { model | roublesMetalFuel = roublesMetalFuel + int }
+
+        EFuel ->
+            { model | roublesExpeditionaryFuel = roublesExpeditionaryFuel + int }
+
 
 
 --- view ---
@@ -193,7 +227,9 @@ update msg model =
 view : Model -> Html Msg
 view ({ solar, fuel } as model) =
     div []
-        [ div []
+        [ div [] <| List.map (viewItemPriceInput model) items
+        , hr [] []
+        , div []
             [ input
                 [ type_ "checkbox"
                 , checked solar
@@ -230,15 +266,15 @@ view ({ solar, fuel } as model) =
         , hr [] []
         , span []
             [ strong [] [ text "Roubles/hour for fuel: " ]
-            , span [] [ text <| (String.fromInt <| fuelRoublesPerHour solar fuel) ++ "₽" ]
+            , span [] [ text <| (String.fromInt <| fuelRoublesPerHour model) ++ "₽" ]
             ]
         , hr [] []
-        , table []
+        , table [ style "border-collapse" "collapse" ]
             [ thead []
-                [ tr []
-                    [ th [] [ text "GPUs" ]
-                    , th [] [ text "time per 0.2btc" ]
-                    , th [] [ text "roubles per hour (less fuel)" ]
+                [ tr [ cellBorder ]
+                    [ th [ cellBorder ] [ text "GPUs" ]
+                    , th [ cellBorder ] [ text "time per 0.2 BTC" ]
+                    , th [ cellBorder ] [ text "roubles per hour (less fuel)" ]
                     ]
                 ]
             , tbody [] <| List.map (row model) (List.range 1 50)
@@ -246,14 +282,55 @@ view ({ solar, fuel } as model) =
         ]
 
 
+cellBorder : Attribute Msg
+cellBorder =
+    style "border" "1px solid black"
+
+
+viewItemPriceInput : Model -> Item -> Html Msg
+viewItemPriceInput model item =
+    let
+        ( name, roubles ) =
+            case item of
+                Gpu ->
+                    ( "GPU", model.roublesGpu )
+
+                Bitcoin ->
+                    ( "Bitcoin (0.2 BTC)", model.roublesBitcoin )
+
+                MFuel ->
+                    ( "Metal Fuel Tank", model.roublesMetalFuel )
+
+                EFuel ->
+                    ( "Expeditionary Fuel Tank", model.roublesExpeditionaryFuel )
+    in
+    case ( item, model.fuel ) of
+        ( EFuel, Metal ) ->
+            text ""
+
+        ( MFuel, Expeditionary ) ->
+            text ""
+
+        _ ->
+            div []
+                [ button [ onClick <| AdjustPrice item 10000 ] [ text "+10k" ]
+                , button [ onClick <| AdjustPrice item 1000 ] [ text "+1k" ]
+                , button [ onClick <| AdjustPrice item -1000 ] [ text "-1k" ]
+                , button [ onClick <| AdjustPrice item -10000 ] [ text "-10k" ]
+                , input [ disabled True, style "text-align" "right", value <| String.fromInt roubles ] []
+                , text "₽ "
+                , label [] [ text name ]
+                ]
+
+
 row : Model -> Int -> Html Msg
-row { solar, fuel } count =
+row ({ solar, fuel } as model) count =
     let
         rph =
-            roublesPerHour count
+            roublesPerHour model count
 
         fph =
-            fuelRoublesPerHour solar fuel
+            fuelRoublesPerHour model
 
         rphlf =
             rph - fph
@@ -264,13 +341,13 @@ row { solar, fuel } count =
                 |> hourMin
                 |> Tuple.mapBoth String.fromInt String.fromInt
 
-        payback =
-            paybackDaysForGpus count
+        -- payback =
+        --     paybackDaysForGpus model count
     in
     tr []
-        [ td [] [ text <| String.fromInt count ]
-        , td [] [ text <| hour ++ "h" ++ min ++ "m" ]
-        , td [] [ text <| String.fromInt rph ++ "₽  (" ++ String.fromInt rphlf ++ "₽" ++ ")" ]
+        [ td [ cellBorder ] [ text <| String.fromInt count ]
+        , td [ cellBorder ] [ text <| hour ++ "h" ++ min ++ "m" ]
+        , td [ cellBorder ] [ text <| String.fromInt rph ++ "₽  (" ++ String.fromInt rphlf ++ "₽" ++ ")" ]
 
         -- , td [] [ text <| String.fromFloat payback ]
         ]
