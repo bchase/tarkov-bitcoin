@@ -10,17 +10,6 @@ import Html.Events exposing (..)
 
 
 -- derived entirely from: https://escapefromtarkov.gamepedia.com/Hideout#Bitcoin_Farm
---
--- TODO
---   functionality
---     [X] rouble cost text inputs
---     [X] per hour / per day toggle
---     [X] payback time
---     [ ] fetch live prices + autopopulate
---   other
---     [X] comma separate roubles, e.g. "12,345"
---     [ ] display explanations from wiki
---     [ ] README
 
 
 fuelUnitPowerTime : Bool -> Float
@@ -259,19 +248,21 @@ view ({ solar, fuel, displayPer } as model) =
                 Day ->
                     "day"
     in
-    div []
-        [ div [] <| List.map (viewItemPriceInput model) items
-        , hr [] []
-        , div []
-            [ input
-                [ type_ "checkbox"
-                , checked solar
-                , onCheck SetSolar
+    div [ style "margin" "30px" ]
+        [ h1 [] [ text "Tarkov Bitcoin Farm Calculator" ]
+        , span []
+            [ text "Entirely based on and thanks to: "
+            , a
+                [ href "https://escapefromtarkov.gamepedia.com/Hideout#Bitcoin_Farm"
                 ]
-                []
-            , label [] [ text "Solar" ]
+                [ text "Hideout - The Official Escape from Tarkov Wiki" ]
             ]
+        , br [] []
+        , br [] []
         , hr [] []
+        , h2 [] [ text "Costs" ]
+        , div [] <| List.map (viewItemPriceInput model) items
+        , br [] []
         , div []
             [ div
                 []
@@ -296,14 +287,28 @@ view ({ solar, fuel, displayPer } as model) =
                 , br [] []
                 ]
             ]
-        , hr [] []
+        , br [] []
+        , div []
+            [ input
+                [ type_ "checkbox"
+                , checked solar
+                , onCheck SetSolar
+                ]
+                []
+            , label [] [ text "Solar" ]
+            ]
+        , br [] []
         , span []
             [ strong [] [ text "Roubles/hour for fuel: " ]
             , span [] [ text <| (format <| fuelRoublesPerHour model) ++ "₽" ]
             ]
+        , br [] []
+        , br [] []
         , hr [] []
+        , br [] []
         , div []
-            [ div
+            [ strong [] [ text "Display roubles per " ]
+            , span
                 []
                 [ input
                     [ type_ "radio"
@@ -311,10 +316,9 @@ view ({ solar, fuel, displayPer } as model) =
                     , onClick <| DisplayPer Hour
                     ]
                     []
-                , label [] [ text "Hour" ]
-                , br [] []
+                , label [] [ text "hour" ]
                 ]
-            , div
+            , span
                 []
                 [ input
                     [ type_ "radio"
@@ -322,10 +326,10 @@ view ({ solar, fuel, displayPer } as model) =
                     , onClick <| DisplayPer Day
                     ]
                     []
-                , label [] [ text "Day" ]
-                , br [] []
+                , label [] [ text "day" ]
                 ]
             ]
+        , br [] []
         , table [ style "border-collapse" "collapse" ]
             [ thead []
                 [ tr [ cellBorder ]
