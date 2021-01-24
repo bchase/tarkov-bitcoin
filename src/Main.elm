@@ -250,15 +250,21 @@ view ({ solar, fuel, displayPer } as model) =
     in
     div [ style "margin" "30px" ]
         [ h1 [] [ text "Tarkov Bitcoin Farm Calculator" ]
-        , span []
+        , p []
             [ text "Entirely based on and thanks to: "
             , a
                 [ href "https://escapefromtarkov.gamepedia.com/Hideout#Bitcoin_Farm"
                 ]
                 [ text "Hideout - The Official Escape from Tarkov Wiki" ]
             ]
-        , br [] []
-        , br [] []
+        , p []
+            [ text "Made with less than three by Brad Chase and available on "
+            , a
+                [ href "https://github.com/bchase/tarkov-bitcoin"
+                ]
+                [ text "GitHub" ]
+            , text " LLLLLLLLLLLLL L L L L L L L L"
+            ]
         , hr [] []
         , h2 [] [ text "Costs" ]
         , div [] <| List.map (viewItemPriceInput model) items
