@@ -403,7 +403,12 @@ row ({ solar, fuel, displayPer } as model) count =
                     rph * 24
 
         roublesLessFuel =
-            roubles - fph
+            case displayPer of
+                Hour ->
+                    roubles - fph
+
+                Day ->
+                    roubles - (fph * 24)
 
         ( hour, min ) =
             count
