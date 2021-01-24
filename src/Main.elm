@@ -71,16 +71,27 @@ timePerBitcoin count =
     1 / bitcoinPerHour count
 
 
-paybackDaysForGpus : Model -> Int -> Float
-paybackDaysForGpus { roublesGpu, roublesBitcoin } count =
+paybackDaysForGpus : Model -> Maybe Int -> Int -> Float
+paybackDaysForGpus { roublesGpu, roublesBitcoin } mfph count =
     let
-        cost =
+        gpuCost =
             toFloat <| roublesGpu * count
+
+        daysForFuel =
+            case mfph of
+                Nothing ->
+                    0
+
+                Just fph ->
+                    (toFloat fph * 24 * daysForGpus) / roublesPerDay
 
         roublesPerDay =
             toFloat roublesBitcoin * bitcoinPerHour count * 24
+
+        daysForGpus =
+            gpuCost / roublesPerDay
     in
-    cost / roublesPerDay
+    daysForGpus + daysForFuel
 
 
 type Fuel
@@ -321,7 +332,7 @@ view ({ solar, fuel, displayPer } as model) =
                     [ th [ cellBorder ] [ text "GPUs" ]
                     , th [ cellBorder ] [ text "time per 0.2 BTC" ]
                     , th [ cellBorder ] [ text <| "roubles per " ++ per ++ " (less fuel)" ]
-                    , th [ cellBorder ] [ text "pay-back-time in days" ]
+                    , th [ cellBorder ] [ text "pay-back-time in days (plus fuel)" ]
                     ]
                 ]
             , tbody [] <| List.map (row model) (List.range 1 50)
@@ -397,13 +408,16 @@ row ({ solar, fuel, displayPer } as model) count =
                 |> Tuple.mapBoth String.fromInt String.fromInt
 
         payback =
-            paybackDaysForGpus model count
+            format_ 2 <| paybackDaysForGpus model Nothing count
+
+        paybackPlusFuel =
+            format_ 2 <| paybackDaysForGpus model (Just fph) count
     in
     tr []
         [ td [ cellBorder ] [ text <| String.fromInt count ]
         , td [ cellBorder ] [ text <| hour ++ "h" ++ min ++ "m" ]
         , td [ cellBorder ] [ text <| format roubles ++ "₽  (" ++ format roublesLessFuel ++ "₽" ++ ")" ]
-        , td [ cellBorder ] [ text <| String.fromFloat payback ]
+        , td [ cellBorder ] [ text <| payback ++ " (" ++ paybackPlusFuel ++ ")" ]
         ]
 
 
@@ -446,7 +460,12 @@ hourMin t =
 
 format : Int -> String
 format =
-    FormatNumber.format { usLocale | decimals = Exact 0 } << toFloat
+    format_ 0 << toFloat
+
+
+format_ : Int -> Float -> String
+format_ dec =
+    FormatNumber.format { usLocale | decimals = Exact dec }
 
 
 
