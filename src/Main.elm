@@ -1,6 +1,8 @@
 module Main exposing (main)
 
 import Browser
+import FormatNumber
+import FormatNumber.Locales exposing (Decimals(..), usLocale)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
@@ -13,10 +15,10 @@ import Html.Events exposing (..)
 --   functionality
 --     [X] rouble cost text inputs
 --     [X] per hour / per day toggle
---     [ ] payback time
+--     [X] payback time
 --     [ ] fetch live prices + autopopulate
 --   other
---     [ ] comma separate roubles, e.g. "12,345"
+--     [X] comma separate roubles, e.g. "12,345"
 --     [ ] display explanations from wiki
 --     [ ] README
 
@@ -286,7 +288,7 @@ view ({ solar, fuel, displayPer } as model) =
         , hr [] []
         , span []
             [ strong [] [ text "Roubles/hour for fuel: " ]
-            , span [] [ text <| (String.fromInt <| fuelRoublesPerHour model) ++ "₽" ]
+            , span [] [ text <| (format <| fuelRoublesPerHour model) ++ "₽" ]
             ]
         , hr [] []
         , div []
@@ -362,7 +364,7 @@ viewItemPriceInput model item =
                 , button [ onClick <| AdjustPrice item 1000 ] [ text "+1k" ]
                 , button [ onClick <| AdjustPrice item -1000 ] [ text "-1k" ]
                 , button [ onClick <| AdjustPrice item -10000 ] [ text "-10k" ]
-                , input [ disabled True, style "text-align" "right", value <| String.fromInt roubles ] []
+                , input [ disabled True, style "text-align" "right", value <| format roubles ] []
                 , text "₽ "
                 , label [] [ text name ]
                 ]
@@ -400,7 +402,7 @@ row ({ solar, fuel, displayPer } as model) count =
     tr []
         [ td [ cellBorder ] [ text <| String.fromInt count ]
         , td [ cellBorder ] [ text <| hour ++ "h" ++ min ++ "m" ]
-        , td [ cellBorder ] [ text <| String.fromInt roubles ++ "₽  (" ++ String.fromInt roubles ++ "₽" ++ ")" ]
+        , td [ cellBorder ] [ text <| format roubles ++ "₽  (" ++ format roublesLessFuel ++ "₽" ++ ")" ]
         , td [ cellBorder ] [ text <| String.fromFloat payback ]
         ]
 
@@ -440,6 +442,11 @@ hourMin t =
             round <| 60 * rem
     in
     ( h, m )
+
+
+format : Int -> String
+format =
+    FormatNumber.format { usLocale | decimals = Exact 0 } << toFloat
 
 
 
