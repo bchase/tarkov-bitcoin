@@ -42,6 +42,21 @@ executable perservant
     ghc-options:
         -fwarn-unused-imports
 
+executable gen-elm
+    main-is:
+        GenElm.hs
+    build-depends:
+        base >= 4.9 && < 5.0
+      , servant-persistent
+      , elm-bridge
+      , servant-elm
+    hs-source-dirs:
+        app
+    default-language:
+        Haskell2010
+    ghc-options:
+        -fwarn-unused-imports
+
 executable update-prices
     main-is:
         UpdatePrices.hs
@@ -90,6 +105,7 @@ library
       , containers
       , ekg
       , ekg-core
+      , elm-bridge
       , fast-logger
       , foreign-store
       , katip >= 0.5.0.2 && < 0.6
@@ -107,6 +123,7 @@ library
       , servant >= 0.13 && < 0.14
       , servant-js >= 0.9 && < 0.10
       , servant-server >= 0.13 && < 0.14
+      , servant-elm
       , string-conv
       , text
       , time

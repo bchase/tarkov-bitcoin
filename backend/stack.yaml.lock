@@ -18,6 +18,28 @@ packages:
       sha256: 603ccba7d86c40cf2e02139d3d843a07c6782edc94b0368947a13f2757fe39da
   original:
     hackage: aeson-lens-0.5.0.0@sha256:7b557d74d1f35ce47905d5ab65d9c87bb59843e24177341995d2bb1ceeb177fb,994
+- completed:
+    name: servant-elm
+    version: 0.7.2
+    git: https://github.com/haskell-servant/servant-elm.git
+    pantry-tree:
+      size: 3221
+      sha256: 815fe5e6f25687feb35183f539793b0d9ec0254fb0ad252cbf25a8620a999d13
+    commit: 95c49abe536d8e468efb5a8a0cd750cf817295f4
+  original:
+    git: https://github.com/haskell-servant/servant-elm.git
+    commit: 95c49abe536d8e468efb5a8a0cd750cf817295f4
+- completed:
+    name: elm-bridge
+    version: 0.6.1
+    git: https://github.com/agrafix/elm-bridge.git
+    pantry-tree:
+      size: 1475
+      sha256: 861fcc57620b5f20b45851277fccd969311fa4a0dc8f32cd4eb7119a6d72ca8a
+    commit: 28400342b143f7899e82fa22a435461116d38760
+  original:
+    git: https://github.com/agrafix/elm-bridge.git
+    commit: 28400342b143f7899e82fa22a435461116d38760
 snapshots:
 - completed:
     size: 507418

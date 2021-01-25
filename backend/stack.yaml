@@ -4,4 +4,8 @@ packages:
 extra-deps:
 - katip-0.5.4.0
 - aeson-lens-0.5.0.0@sha256:7b557d74d1f35ce47905d5ab65d9c87bb59843e24177341995d2bb1ceeb177fb,994
+- git: https://github.com/haskell-servant/servant-elm.git
+  commit: 95c49abe536d8e468efb5a8a0cd750cf817295f4
+- git: https://github.com/agrafix/elm-bridge.git
+  commit: 28400342b143f7899e82fa22a435461116d38760
 resolver: lts-11.8

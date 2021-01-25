@@ -23,6 +23,8 @@ import Say
 import Config (Config, configPool)
 import Data.Text (Text)
 
+import qualified Elm.Derive as Elm
+
 
 
 share
@@ -62,3 +64,8 @@ runDb :: (MonadReader Config m, MonadIO m) => SqlPersistT IO b -> m b
 runDb query = do
     pool <- asks configPool
     liftIO $ runSqlPool query pool
+
+
+--- ELM
+
+Elm.deriveElmDef Elm.defaultOptions ''Item
