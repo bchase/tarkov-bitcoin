@@ -13,7 +13,7 @@ imports: ## Format all the imports that have changed since the master branch.
 	./stylish-haskell.sh
 
 typecheck:
-	ghcid --command "stack ghci"
+	ghcid --command "stack ghci servant-persistent"
 repl:
 	ls .env && . ./.env && stack ghci --main-is Main --ghci-options=-fobject-code
 install:

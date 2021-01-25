@@ -49,6 +49,7 @@ Item json
     link Text
     wikiLink Text
     updated UTCTime
+    deriving Show Eq
 |]
 
 doMigrations :: SqlPersistT IO ()
