@@ -1,0 +1,54 @@
+--- servant ---
+
+[
+  {
+    "uid": "5ac84494-465a-424a-b36e-fe22869ba5ec",
+    "bsgId": "59faff1d86f7746c51718c9c",
+    "name": "Physical bitcoin",
+    "shortName": "0.2BTC",
+    "price": 116409,
+    "basePrice": 123577,
+    "avg24hPrice": 116409,
+    "avg7daysPrice": 116409,
+    "traderName": "Therapist",
+    "traderPrice": 74146,
+    "traderPriceCur": "₽",
+    "updated": "2020-07-10T00:33:56.458Z",
+    "link": "https://tarkov-market.com/item/physical_bitcoin_(btc)",
+    "wikiLink": "https://escapefromtarkov.gamepedia.com/Physical_bitcoin",
+  }
+]
+
+
+
+--- https://tarkov-market.com ---
+
+$ curl -H x-api-key:your_api_key https://tarkov-market.com/api/v1/item?uid=5ac84494-465a-424a-b36e-fe22869ba5ec
+$ curl -H x-api-key:your_api_key https://tarkov-market.com/api/v1/item?q=btc
+
+
+[
+  {
+    "uid": "5ac84494-465a-424a-b36e-fe22869ba5ec",
+    "bsgId": "59faff1d86f7746c51718c9c",
+    "name": "Physical bitcoin",
+    "shortName": "0.2BTC",
+    "price": 116409,
+    "basePrice": 123577,
+    "avg24hPrice": 116409,
+    "avg7daysPrice": 116409,
+    "traderName": "Therapist",
+    "traderPrice": 74146,
+    "traderPriceCur": "₽",
+    "updated": "2020-07-10T00:33:56.458Z",
+    "slots": 1,
+    "diff24h": 0,
+    "diff7days": 0,
+    "icon": "https://gamepedia.cursecdn.com/escapefromtarkov_gamepedia/f/fa/Bitcoin_icon.png?version=2796a56750d2f623cc86eb25fe47304e",
+    "link": "https://tarkov-market.com/item/physical_bitcoin_(btc)",
+    "wikiLink": "https://escapefromtarkov.gamepedia.com/Physical_bitcoin",
+    "img": "https://gamepedia.cursecdn.com/escapefromtarkov_gamepedia/f/fa/Bitcoin_icon.png?version=2796a56750d2f623cc86eb25fe47304e",
+    "imgBig": "https://gamepedia.cursecdn.com/escapefromtarkov_gamepedia/thumb/5/50/Bitcoin.png/307px-Bitcoin.png?version=8e52ba2af892f873b43a831638315887",
+    "reference": "https://www.patreon.com/tarkov_market"
+  }
+]
